@@ -1,4 +1,4 @@
-package model;
+package com.example.checkbookservice.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

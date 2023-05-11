@@ -1,8 +1,9 @@
-package service;
+package com.example.creationbookservice;
 
-import model.BookModel;
+import com.example.creationbookservice.BookModel;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Service
+@EnableScheduling
 public class BookGenerator {
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -17,12 +19,13 @@ public class BookGenerator {
     @Scheduled(fixedDelay = 20000)
     public void generateAndSendBook() {
         BookModel newBook = createNewBook();
-        rabbitTemplate.convertAndSend("bookExchange", "book.create", newBook);
+        rabbitTemplate.convertAndSend("bookExchange", "", newBook); // Пустая строка вместо routingKey
+        System.out.println("ADD");
     }
+
 
     private BookModel createNewBook() {
         // Зайте новую книгу с произвольными данными
-
         return  new BookModel(
                 UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE, // генерация случайного id
                 "Book " + new Random().nextInt(100), // генерация случайного названия

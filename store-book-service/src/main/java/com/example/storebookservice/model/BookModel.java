@@ -1,4 +1,4 @@
-package model;
+package com.example.storebookservice.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
