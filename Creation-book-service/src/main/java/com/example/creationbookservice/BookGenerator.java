@@ -13,24 +13,25 @@ import java.util.UUID;
 @Service
 @EnableScheduling
 public class BookGenerator {
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
-    @Scheduled(fixedDelay = 20000)
+    @Autowired
+    public BookGenerator(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    private Long count = 0L;
+
+    @Scheduled(fixedDelay = 10000)
     public void generateAndSendBook() {
         BookModel newBook = createNewBook();
-        rabbitTemplate.convertAndSend("bookExchange", "", newBook); // Пустая строка вместо routingKey
-        System.out.println("ADD");
+        rabbitTemplate.convertAndSend("bookExchange", "bookKey", newBook);
+        System.out.println("ADD book " + newBook.getId());
     }
 
 
     private BookModel createNewBook() {
         // Зайте новую книгу с произвольными данными
-        return  new BookModel(
-                UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE, // генерация случайного id
-                "Book " + new Random().nextInt(100), // генерация случайного названия
-                "Description for book ",
-                new Random().nextDouble() * 100 // генерация случайной цены
-        );
+        return new BookModel(count++, "name", "description", "status", 12);
     }
 }

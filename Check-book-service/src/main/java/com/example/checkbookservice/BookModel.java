@@ -1,15 +1,19 @@
-package com.example.checkbookservice.model;
+package com.example.checkbookservice;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
-public class BookModel {
+@AllArgsConstructor
+public class BookModel implements Serializable {
     private Long id;
     private String name;
     private String description;
-    private String status = "unchecked";
+    private String status;
     private double price;
 
     public BookModel(Long id, String name, String description, double price) {

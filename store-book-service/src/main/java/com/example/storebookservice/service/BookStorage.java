@@ -1,28 +1,27 @@
 package com.example.storebookservice.service;
 
+import com.example.storebookservice.model.BookEntity;
 import com.example.storebookservice.model.BookModel;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BookStorage {
-    private static final String INSERT_SQL = "INSERT INTO rabbitdb (id, name, description, status, price) VALUES (?, ?, ?, ?, ?)";
 
-    private final JdbcTemplate jdbcTemplate;
 
-    public BookStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    private final BookRepository bookRepository;
+
+    @Autowired
+    public BookStorage(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
     }
 
-    @RabbitListener(queues = "bookCheckedQueue")
-    public void storeBook(BookModel checkedBook) {
-        jdbcTemplate.update(INSERT_SQL,
-                checkedBook.getId(),
-                checkedBook.getName(),
-                checkedBook.getDescription(),
-                checkedBook.getStatus(),
-                checkedBook.getPrice()
-        );
+
+    @RabbitListener(queues = "bookQueue2")
+    public void storeBook(BookModel book) {
+        BookEntity bookEntity = new BookEntity(book.getId(), book.getName(), book.getDescription(), book.getStatus(), book.getPrice());
+        bookRepository.save(bookEntity);
+        System.out.println("book saved " + book.getId());
     }
 }

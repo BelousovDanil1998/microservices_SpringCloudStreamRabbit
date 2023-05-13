@@ -1,6 +1,6 @@
-package com.example.checkbookservice.service;
+package com.example.checkbookservice;
 
-import com.example.checkbookservice.model.BookModel;
+import com.example.checkbookservice.BookModel;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +11,10 @@ public class BookStatusChecker {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @RabbitListener(queues = "book.create")
+    @RabbitListener(queues = "bookQueue")
     public void checkBookStatus(BookModel book) {
         book.setStatus("checked");
         rabbitTemplate.convertAndSend("bookExchange", "book.checked", book);
+        System.out.println("book checked");
     }
 }
