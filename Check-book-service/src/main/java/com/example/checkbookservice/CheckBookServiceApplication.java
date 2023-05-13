@@ -12,37 +12,24 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.handler.annotation.SendTo;
 
+import java.util.function.Function;
+
 @SpringBootApplication
 public class CheckBookServiceApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CheckBookServiceApplication.class, args);
-	}
-	@Bean
-	public MessageConverter messageConverter() {
-		return new Jackson2JsonMessageConverter();
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CheckBookServiceApplication.class, args);
+    }
 
-	@Bean
-	public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-		RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-		rabbitTemplate.setMessageConverter(messageConverter());
-		return rabbitTemplate;
-	}
-	@Bean
-	public Queue queue() {
-		return new Queue("bookQueue2", true);
-	}
-
-	@Bean
-	public DirectExchange exchange() {
-		return new DirectExchange("bookExchange");
-	}
-
-	@Bean
-	public Binding binding(Queue queue, DirectExchange exchange) {
-		return BindingBuilder.bind(queue).to(exchange).with("book.checked");
-	}
-
+    static class Processor {
+        @Bean
+        public Function<BookModel, BookModel> process() {
+            return book -> {
+                book.setStatus("checked");
+                System.out.println("check book " + book.getId());
+                return book;
+            };
+        }
+    }
 
 }

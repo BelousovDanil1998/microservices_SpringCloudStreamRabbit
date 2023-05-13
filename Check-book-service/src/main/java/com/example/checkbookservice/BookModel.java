@@ -15,11 +15,4 @@ public class BookModel implements Serializable {
     private String description;
     private String status;
     private double price;
-
-    public BookModel(Long id, String name, String description, double price) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-    }
 }

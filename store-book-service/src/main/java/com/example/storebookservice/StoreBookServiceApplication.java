@@ -1,13 +1,13 @@
 package com.example.storebookservice;
 
-import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.amqp.support.converter.MessageConverter;
+import com.example.storebookservice.model.BookEntity;
+import com.example.storebookservice.model.BookModel;
+import com.example.storebookservice.service.BookRepository;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import java.util.function.Consumer;
 
 @SpringBootApplication
 public class StoreBookServiceApplication {
@@ -16,30 +16,21 @@ public class StoreBookServiceApplication {
         SpringApplication.run(StoreBookServiceApplication.class, args);
     }
 
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+    static class Subscriber {
 
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(jsonMessageConverter());
-        return factory;
-    }
-    @Bean
-    public Queue queue() {
-        return new Queue("bookQueue2", true);
-    }
+        private final BookRepository bookRepository;
 
-    @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange("bookExchange");
-    }
+        Subscriber(BookRepository bookRepository) {
+            this.bookRepository = bookRepository;
+        }
 
-    @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with("book.checked");
+        @Bean
+        public Consumer<BookModel> subscribe() {
+            return book -> {
+                BookEntity bookEntity = new BookEntity(book.getId(), book.getName(), book.getDescription(), book.getStatus(), book.getPrice());
+                bookRepository.save(bookEntity);
+                System.out.println("book saved " + book.getId());
+            };
+        }
     }
 }

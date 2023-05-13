@@ -1,0 +1,16 @@
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      function:
+        definition: publish
+      poller:
+        fixed-delay: 10000
+      bindings:
+        publish-out-0:
+          destination: publisher_channel
